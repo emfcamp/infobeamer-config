@@ -18,7 +18,14 @@
         "name": "info_font",
         "type": "font",
         "default": "silkscreen.ttf"
-    }, 
+    }, {
+        "title": "Bold Font",
+        "ui_width": 4,
+        "name": "bold_font",
+        "type": "font",
+        "default": "silkscreen.ttf"
+        
+    },
 
     {
         "title": "Scheduling",
@@ -30,6 +37,7 @@
         "type": "select",
         "hint": "The timezone",
         "options": [
+            ["Europe/London", "Europe / London"],
             ["UTC", "UTC"],
             ["Europe/Berlin", "Europa / Berlin"],
             ["US/Central", "US / Central"],

@@ -6,6 +6,7 @@ var config = {
       <div class='row'>
         <div class='col-xs-3'>
           <select class='btn btn-default' v-model="mode">
+            <option value="on_now">On Now</option>
             <option value="all_talks">All Talks</option>
             <option value="next_talk">Next Talk</option>
             <option value="other_talks">Other Talks</option>

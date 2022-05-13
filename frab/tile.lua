@@ -4,7 +4,7 @@ local json = require "json"
 local helper = require "helper"
 local anims = require(api.localized "anims")
 
-local font, info_font
+local font, info_font, bold_font
 local white = resource.create_colored_texture(1,1,1)
 local fallback_track_background = resource.create_colored_texture(.5,.5,.5,1)
 
@@ -34,6 +34,7 @@ end
 function M.updated_config_json(config)
     font = resource.load_font(api.localized(config.font.asset_name))
     info_font = resource.load_font(api.localized(config.info_font.asset_name))
+    bold_font = resource.load_font(api.localized(config.bold_font.asset_name))
     show_language_tags = config.show_language_tags
 
     rooms = {}
@@ -177,6 +178,65 @@ local function check_next_talk()
     print("found " .. #other_talks .. " other talks")
     pp(next_talks)
 end
+
+local function view_on_now(starts, ends, config, x1, y1, x2, y2)
+    local title_size = 40
+    local speaker_size = 36
+    local r,g,b = helper.parse_rgb(config.color or "#ffffff")
+
+    local a = anims.Area(x2 - x1, y2 - y1)
+
+    local S = starts
+    local E = ends
+
+    local function text(...)
+        return a.add(anims.moving_font(S, E, ...))
+    end
+    
+    local x, y = 0, 0
+    if current_talk then
+        -- Title
+        local y_start = y
+
+        local lines = wrap(current_talk.title, bold_font, title_size, a.width)
+        for idx = 1, math.min(5, #lines) do
+            text(bold_font, x, y, lines[idx], title_size, r,g,b,1)
+            y = y + title_size
+        end
+        y = y + 5
+
+        -- Speakers
+        for idx = 1, #current_talk.speakers do
+            text(font, x, y, current_talk.speakers[idx], speaker_size, r,g,b,1)
+            y = y + speaker_size
+        end
+    end
+
+    for now in api.frame_between(starts, ends) do
+        a.draw(now, x1, y1, x2, y2)
+    end
+end
+
+-- local function view_on_now(starts, ends, config, x1, y1, x2, y2)
+--     local font_size = 36
+--     local default_color = {helper.parse_rgb("#ffffff")}
+
+--     local a = anims.Area(x2 - x2, y2 - y1)
+--     local S = starts
+--     local E = ends
+
+--     local function text(...)
+--         return a.add(anims.moving_font(S, E, font, ...))
+--     end
+
+--     local x, y = 0, 0
+
+--     text(x, y, "Testing", font_size, rgba(default_color,1))
+--     pp("Is this working at all?")
+--     for now in api.frame_between(starts, ends) do
+--         a.draw(now, x1, y1, x2, y2)
+--     end
+-- end
 
 local function view_next_talk(starts, ends, config, x1, y1, x2, y2)
     local font_size = config.font_size or 70
@@ -560,6 +620,7 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
         other_talks = view_other_talks,
         room_info = view_room_info,
         all_talks = view_all_talks,
+        on_now = view_on_now,
 
         room = view_room,
         day = view_day,
